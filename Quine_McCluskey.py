@@ -50,7 +50,7 @@ def numero_variaveis(binarios):
     Conta o tanto de variáveis que a expressao tem, analisando pelo primeiro termo da lista de termos.
 
     Args:
-        expressao ([String]): Expressao com a soma de n termos, cada um contendo variáveis barradas (a'), ou não (a).
+        binarios ([List]): Lista de numeros em binário.
 
     Returns:
         qntd_variaveis ([Int]): Quantidade de ter variáveis que o termo possui
@@ -100,13 +100,12 @@ def separa_indices(binarios):
     Ao final, removi todas as listas vazias que restaram, pois meu indice poderia ir até o 7, no entanto poderia não ter nenhum indice 3, por exemplo.
 
     Args:
-        expressao ([String]): Expressao com a soma de n termos, cada um contendo variáveis barradas (a'), ou não (a).
+        binarios ([List]): Lista de numeros em binário.
 
     Returns:
         indices [List]: Uma lista com outras listas dentro, cada uma dela contendo os numeros binarios de acordo com o indice de cada uma
     """
 
-    # binarios = transforma_em_binario(expressao)
     maior_indice = 0
     indice_correspondente = []
     indices = []
@@ -131,13 +130,23 @@ def separa_indices(binarios):
     return indices
 
 def compara_indices(binarios):
+    """
+    Precisa-se comparar cada numero de um indice por todos os numeros do proximo indice.
+    Caso na comparacao so exista um numero diferente, ele e colocado na lista para ser comparado novamente
+
+    Args:
+        binarios ([type]): Lista com binarios
+
+    Returns:
+        lista_para_ser_comparada_novamente ([List]): Lista com os binarios já comparados, para ser comparada novamente
+    """
     indices = separa_indices(binarios)
     qntd_variaveis = numero_variaveis(binarios)
     tamanho_indices = len(indices)
     sairam_da_interacao = []
     lista_para_ser_comparada_novamente = []
 
-    # [['001', '100'], ['011', '101', '110']]
+     # [['001', '100'], ['011', '101', '110']]
 
     for binarios_indice_i in indices: #pega as listas dentro da lista de indices
         indice_da_px_lista = indices.index(binarios_indice_i)+1 # pega o indice da px lista da lista de indices
@@ -158,7 +167,7 @@ def compara_indices(binarios):
 
                     if cont == 1: # so pode ter um termo diferente para poder sair
                         lista_para_ser_comparada_novamente.append(termo_i_aux)
-                        if termo_i not in sairam_da_interacao:
+                        if termo_i not in sairam_da_interacao: #fiz a funcao mas ainda nao uso essa lista de sairam da interacao
                             sairam_da_interacao.append(termo_i)
                         if termo_i_mais_1 not in sairam_da_interacao:
                             sairam_da_interacao.append(termo_i_mais_1)
@@ -168,6 +177,16 @@ def compara_indices(binarios):
     return lista_para_ser_comparada_novamente
 
 def compara_n_vezes(binarios):
+    """
+    Enquanto ainda houver elementos na lista que foi comparada, ela deve ser comparada novamente.
+
+    Args:
+        binarios ([type]): Lista com binarios
+
+    Returns:
+        lista_para_ser_comparada ([List]): Lista vazia sem mais comparacoes
+    """
+    
     lista_para_ser_comparada = compara_indices(binarios)
     while len(lista_para_ser_comparada) != 0:
         print(lista_para_ser_comparada)
