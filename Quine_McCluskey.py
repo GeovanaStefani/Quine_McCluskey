@@ -45,7 +45,7 @@ def transforma_em_binario(expressao):
 
     return binarios
 
-def numero_variaveis(expressao):
+def numero_variaveis(binarios):
     """ 
     Conta o tanto de variáveis que a expressao tem, analisando pelo primeiro termo da lista de termos.
 
@@ -56,7 +56,7 @@ def numero_variaveis(expressao):
         qntd_variaveis ([Int]): Quantidade de ter variáveis que o termo possui
     """
 
-    termo = transforma_em_binario(expressao)[0]
+    termo = binarios[0]
     qntd_variaveis = len(termo)
 
     return qntd_variaveis
@@ -89,7 +89,7 @@ def binario_para_decimal(expressao):
 
     return decimais
 
-def separa_indices(expressao):
+def separa_indices(binarios):
     """
     Para fazer o Quine-McCluskey é preciso separar os binarios em indíces, eles são a quantidade de 1's que o número tem
     Dessa forma, eu preciso de uma lista com várias listas dentros, cada uma posicionada no indice correto.
@@ -106,7 +106,7 @@ def separa_indices(expressao):
         indices [List]: Uma lista com outras listas dentro, cada uma dela contendo os numeros binarios de acordo com o indice de cada uma
     """
 
-    binarios = transforma_em_binario(expressao)
+    # binarios = transforma_em_binario(expressao)
     maior_indice = 0
     indice_correspondente = []
     indices = []
@@ -125,14 +125,14 @@ def separa_indices(expressao):
         indices[i[1]].append(i[0])
 
     for m in indices:
-        if len(m) == 0 or int(m[0]) == 0:
+        if len(m) == 0 or m[0] == "0"*numero_variaveis(binarios):
             indices.remove(m)
 
     return indices
 
-def compara_indices(expressao):
-    indices = separa_indices(expressao)
-    qntd_variaveis = numero_variaveis(expressao)
+def compara_indices(binarios):
+    indices = separa_indices(binarios)
+    qntd_variaveis = numero_variaveis(binarios)
     tamanho_indices = len(indices)
     sairam_da_interacao = []
     lista_para_ser_comparada_novamente = []
@@ -156,7 +156,6 @@ def compara_indices(expressao):
                         else:
                             termo_i_aux += termo_i[interador]
 
-                     
                     if cont == 1: # so pode ter um termo diferente para poder sair
                         lista_para_ser_comparada_novamente.append(termo_i_aux)
                         if termo_i not in sairam_da_interacao:
@@ -166,6 +165,12 @@ def compara_indices(expressao):
 
                         print("O elemento do primeiro indice analisado {} saiu pois encontrou o termo {} na px lista que só tem um numero diferente".format(termo_i, termo_i_mais_1))
     
-    print(lista_para_ser_comparada_novamente)
-                        
+    return lista_para_ser_comparada_novamente
 
+def compara_n_vezes(binarios):
+    lista_para_ser_comparada = compara_indices(binarios)
+    while len(lista_para_ser_comparada) != 0:
+        print(lista_para_ser_comparada)
+        lista_para_ser_comparada = compara_indices(lista_para_ser_comparada)
+
+    return lista_para_ser_comparada

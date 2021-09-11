@@ -6,8 +6,11 @@
 # Decimal = 0, 1, 3, 4, 5, 6
 # indices separados = [['001', '100'], ['011', '101', '110']]
 
+#a'b'c + a'bc' + ab'c' + a'bc + abc' + abc
+#x'y'z + xy'z' + x'yz' + x'yz + xy'z + xyz
+
 from Quine_McCluskey import *
 
 expressao = input()
-
-compara_indices(expressao)
+binarios = transforma_em_binario(expressao)
+print(compara_n_vezes(binarios))
