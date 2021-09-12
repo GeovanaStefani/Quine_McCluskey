@@ -8,9 +8,10 @@
 
 #a'b'c + a'bc' + ab'c' + a'bc + abc' + abc
 #x'y'z + xy'z' + x'yz' + x'yz + xy'z + xyz
+#abcd + abcd' + abc'd'
 
 from Quine_McCluskey import *
 
 expressao = input()
 binarios = transforma_em_binario(expressao)
-print(compara_n_vezes(binarios))
+print(transforma_em_variaveis(expressao, binarios))
