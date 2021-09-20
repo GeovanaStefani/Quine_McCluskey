@@ -9,6 +9,8 @@
 #a'b'c + a'bc' + ab'c' + a'bc + abc' + abc
 #x'y'z + xy'z' + x'yz' + x'yz + xy'z + xyz
 #abcd + abcd' + abc'd'
+#a'b'c'd' + a'b'cd + a'bcd' + a'bc'd + abc'd'
+#y = a'bc'd' + abc'd' + a'b'c'd + a'bc'd + a'bcd' + abcd'
 
 from Quine_McCluskey import *
 
