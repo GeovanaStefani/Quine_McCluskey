@@ -1,6 +1,19 @@
 from Constantes import *
 
 def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
+    """
+    obseva a opcao que o usario vai mandar a expressao e faz as alteracoes com base em cada opcao:
+    0: transforma variaveis em binario
+    1: pega o input e coloca em uma lista
+    2: transforma de decimal para binario
+
+    Args:
+        opcao ([Int]): opcao da expressao
+        expressao_ou_binario_ou_decimais ([str]): expressao que pode ser em variaveis, binarios ou minetermos
+
+    Returns:
+        binarios [List]: Lista de binarios
+    """
     if opcao == 0:
         binarios = transforma_em_binario(expressao_ou_binario_ou_decimais)
     elif opcao == 1:
@@ -17,6 +30,16 @@ def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
     return binarios
 
 def completa_variaveis(binarios):
+    """
+    Quando transforma os valores de decimal para binario, retirasse os 0's que ficam no comeco, e isso nao pode acontecer.
+    Então eu completo com o tanto de variaveis que o numero tem
+
+    Args:
+        binarios ([Lista]): lista de binarios
+
+    Returns:
+        binarios [List]: binarios completados
+    """
     maior = 0
     for b in binarios:
         if len(b)> maior:
@@ -45,25 +68,6 @@ def lista_de_termos(expressao):
     termos = expressao.split(CARACTERE_SOMA)
 
     return termos
-
-def quais_sao_as_variaveis(expressao):
-    """
-    cria uma variavel so com as variaveis, sem os barramentos
-
-    Args:
-        expressao ([String]): Expressao com a soma de n termos, cada um contendo variáveis barradas (a'), ou não (a).
-
-    Returns:
-        aux ([String]): Com as variaveis utilizadas
-    """
-    termos = lista_de_termos(expressao)
-
-    aux = ""
-    for t in termos[0]:
-        if t!= CARACTERE_BARRAMENTO:
-            aux+=t
-
-    return aux
 
 def transforma_em_binario(expressao):
     """
@@ -134,21 +138,6 @@ def binario_para_decimal(binario):
         qntd_numeros -= 1
     
     return decimal
-
-def decimal_para_binario(decimal):
-    binario = []
-    while decimal!=1:
-        decimal = decimal//2
-        binario.append(decimal%2)
-
-    binario.reverse()
-    binario.append(1)
-
-    aux = ""
-    for b in binario:
-        aux += str(b)
-
-    return aux
 
 def separa_indices(binarios):
     """
