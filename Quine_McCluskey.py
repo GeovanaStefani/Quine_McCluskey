@@ -1,5 +1,37 @@
 from Constantes import *
 
+def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
+    if opcao == 0:
+        binarios = transforma_em_binario(expressao_ou_binario_ou_decimais)
+    elif opcao == 1:
+        binarios = list(expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR))
+    elif opcao == 2:
+        binarios = []
+        decimais = list(map(int, expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR)))
+        
+        for d in decimais:
+            binarios.append(str(format(d, "b")))
+
+        binarios = completa_variaveis(binarios)
+
+    return binarios
+
+def completa_variaveis(binarios):
+    maior = 0
+    for b in binarios:
+        if len(b)> maior:
+            maior = len(b)
+
+    for b in binarios:
+        aux = b
+        while len(aux) < maior:
+            aux = "0" + aux
+
+        indice = binarios.index(b)
+        binarios[indice] = aux
+
+    return binarios
+
 def lista_de_termos(expressao):
     """ 
     Transforma a expressao em uma lista de termos
@@ -32,7 +64,6 @@ def quais_sao_as_variaveis(expressao):
             aux+=t
 
     return aux
-
 
 def transforma_em_binario(expressao):
     """
@@ -99,10 +130,25 @@ def binario_para_decimal(binario):
     qntd_numeros = len(binario)
     decimal = 0
     for numero in binario:
-        decimal+=(int(numero)*(BASE_DECIMAL**(qntd_numeros-1)))
+        decimal+=(int(numero)*(BASE_BINARIA**(qntd_numeros-1)))
         qntd_numeros -= 1
     
     return decimal
+
+def decimal_para_binario(decimal):
+    binario = []
+    while decimal!=1:
+        decimal = decimal//2
+        binario.append(decimal%2)
+
+    binario.reverse()
+    binario.append(1)
+
+    aux = ""
+    for b in binario:
+        aux += str(b)
+
+    return aux
 
 def separa_indices(binarios):
     """
@@ -139,7 +185,7 @@ def separa_indices(binarios):
         indices[i[1]].append(i[0])
 
     for m in indices:
-        if len(m) == 0 or m[0] == BINARIO_0*numero_variaveis(binarios): #avaliar isso
+        if len(m) == 0 : #avaliar isso: or m[0] == BINARIO_0*numero_variaveis(binarios)
             indices.remove(m)
 
     return indices
@@ -249,28 +295,6 @@ def compara_n_vezes(binarios):
     
     return nao_sairam, decimais_comparados_so_com_termos_nao_sairam
 
-def retira_elementos_iguais_da_lista_nao_sairam(binarios):
-    """
-    Tira o ultimo elemento da lista de nao sairam caso ele seja igual ao anterior.
-
-    Ainda vou analisar se há posiibilidade de outros elementos serem iguais além dos dois ultimos, para melhorar essa funcao.
-
-    Args:
-        binarios ([type]): Lista com binarios
-
-    Returns:
-        nao_sairam ([List]): lista dos elementos que nao sairam simplificada.
-    """
-    nao_sairam = compara_n_vezes(binarios)[0]
-    tamanho_nao_sairam = len(nao_sairam)
-    ultimo_elem_nao_sairam = nao_sairam[tamanho_nao_sairam-1]
-    penultimo_elem_nao_sairam = nao_sairam[tamanho_nao_sairam-2]
-
-    if ultimo_elem_nao_sairam == penultimo_elem_nao_sairam:  # analisar ainda
-        nao_sairam.pop()
-
-    return nao_sairam
-
 def calcula_crivo(binarios):
     """
     O crivo minimiza ainda mais a expressao.
@@ -304,7 +328,7 @@ def calcula_crivo(binarios):
         
     return simplificados_ao_maximo
             
-def transforma_em_variaveis(expressao, binarios):
+def transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios):
     """
     Transforma os elementos que nao sairam da lista de comparacao em variaveis e, consequentemente, termos da expressao.
     Bem parecida com a funcao que transforma em binarios, sendo que ao contrario.
@@ -316,13 +340,15 @@ def transforma_em_variaveis(expressao, binarios):
     Returns:
         expressao_simplificada ([String]): expressao inicial, so que agora simplificada
     """
-    variaveis = quais_sao_as_variaveis(expressao)
+
+    variaveis = VARIAVEIS_POSSIVEIS
+    qntd_variaveis = numero_variaveis(binarios)
     simplificados_ao_maximo = calcula_crivo(binarios)
     expressao_simplificada = ""
 
     for num in simplificados_ao_maximo:
         aux = ""
-        for i in range(len(variaveis)):
+        for i in range(qntd_variaveis):
             if num[i] == BINARIO_0:
                 aux += variaveis[i]+CARACTERE_BARRAMENTO
             elif num[i] == BINARIO_1:
@@ -331,6 +357,6 @@ def transforma_em_variaveis(expressao, binarios):
         expressao_simplificada += aux+CARACTERE_SOMA
 
     if len(expressao_simplificada) == 0: #se nao pode ser simplificada, recebe a propria expresao
-        expressao_simplificada = expressao
+        expressao_simplificada = expressao_ou_binario_ou_decimais
 
     return expressao_simplificada.rstrip(CARACTERE_SOMA)

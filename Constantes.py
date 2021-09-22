@@ -1,7 +1,9 @@
+VARIAVEIS_POSSIVEIS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 CARACTERE_SOMA = " + "
+CARACTERE_SEPARAR = ","
 CARACTERE_BARRAMENTO = "'"
 CARACTERE_DIFERENTE = "_"
 BINARIO_0 = "0"
 BINARIO_1 = "1"
-BASE_DECIMAL = 2
+BASE_BINARIA = 2
 COMPARACOES_POR_VEZ = 2
