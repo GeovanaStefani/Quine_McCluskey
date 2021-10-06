@@ -1,60 +1,5 @@
 from Constantes import *
 
-def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
-    """
-    obseva a opcao que o usario vai mandar a expressao e faz as alteracoes com base em cada opcao:
-    0: transforma variaveis em binario
-    1: pega o input e coloca em uma lista
-    2: transforma de decimal para binario
-
-    Args:
-        opcao ([Int]): opcao da expressao
-        expressao_ou_binario_ou_decimais ([str]): expressao que pode ser em variaveis, binarios ou minetermos
-
-    Returns:
-        binarios [List]: Lista de binarios
-    """
-    if opcao == 0:
-        binarios = transforma_em_binario(expressao_ou_binario_ou_decimais)
-    elif opcao == 1:
-        binarios = list(expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR))
-    elif opcao == 2:
-        binarios = []
-        decimais = list(map(int, expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR)))
-        
-        for d in decimais:
-            binarios.append(str(format(d, "b")))
-
-        binarios = completa_variaveis(binarios)
-
-    return binarios
-
-def completa_variaveis(binarios):
-    """
-    Quando transforma os valores de decimal para binario, retirasse os 0's que ficam no comeco, e isso nao pode acontecer.
-    Então eu completo com o tanto de variaveis que o numero tem
-
-    Args:
-        binarios ([Lista]): lista de binarios
-
-    Returns:
-        binarios [List]: binarios completados
-    """
-    maior = 0
-    for b in binarios:
-        if len(b)> maior:
-            maior = len(b)
-
-    for b in binarios:
-        aux = b
-        while len(aux) < maior:
-            aux = "0" + aux
-
-        indice = binarios.index(b)
-        binarios[indice] = aux
-
-    return binarios
-
 def lista_de_termos(expressao):
     """ 
     Transforma a expressao em uma lista de termos
@@ -272,7 +217,7 @@ def compara_n_vezes(binarios):
         decimais_comparados_so_com_termos_nao_sairam ([Dict]): O dicionario com os termos e valores em decimal que foram comparados, só que apenas os que nao sairam da interacao,
         e por isso, precisam ser analisados.
     """
-    
+
     lista_para_ser_comparada, nao_sairam, decimais_comparados= compara_indices(binarios)
     while len(lista_para_ser_comparada) != 0:
         lista_para_ser_comparada, nao_sairam, decimais_comparados = compara_indices(lista_para_ser_comparada, nao_sairam, decimais_comparados)
@@ -284,20 +229,19 @@ def compara_n_vezes(binarios):
     
     return nao_sairam, decimais_comparados_so_com_termos_nao_sairam
 
-def calcula_crivo(binarios):
+def calcula_crivo(decimais_comparados):
     """
     O crivo minimiza ainda mais a expressao.
     Para isso, pega-se todos os valores (em decimal) que foram comparados ate chegar naquele termo.
     Se todos os numeros ja estiverem sendo usados por outros termos, o termo é retirado
 
     Args:
-        binarios ([List]): Lista com binarios.
+        decimais_comparados ([List]): Lista com decimais ja comparados.
 
     Returns:
         simplificados_ao_maximo [List]: Lista com os termos simplificados ao maximo
     """
 
-    decimais_comparados = compara_n_vezes(binarios)[1]
     todos_decimais = []
     simplificados_ao_maximo = []
 
@@ -316,15 +260,42 @@ def calcula_crivo(binarios):
             simplificados_ao_maximo.append(elem)
         
     return simplificados_ao_maximo
+
+def completa_variaveis(binarios):
+    """
+    Quando transforma os valores de decimal para binario, retirasse os 0's que ficam no comeco, e isso nao pode acontecer.
+    Então eu completo com o tanto de variaveis que o numero tem
+
+    Args:
+        binarios ([Lista]): lista de binarios
+
+    Returns:
+        binarios [List]: binarios completados
+    """
+    maior = 0
+    for b in binarios:
+        if len(b)> maior:
+            maior = len(b)
+
+    for b in binarios:
+        aux = b
+        while len(aux) < maior:
+            aux = "0" + aux
+
+        indice = binarios.index(b)
+        binarios[indice] = aux
+
+    return binarios
             
-def transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios):
+def transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios, simplificados_ao_maximo):
     """
     Transforma os elementos que nao sairam da lista de comparacao em variaveis e, consequentemente, termos da expressao.
     Bem parecida com a funcao que transforma em binarios, sendo que ao contrario.
 
     Args:
         expressao ([String]): Expressao com a soma de n termos, cada um contendo variáveis barradas (a'), ou não (a).
-        binarios ([type]): Lista com binarios
+        binarios ([List]): Lista com binarios
+        simplificados_ao_maximo ([List]):  Lista com os numeros simplificados ao maximo
 
     Returns:
         expressao_simplificada ([String]): expressao inicial, so que agora simplificada
@@ -332,7 +303,6 @@ def transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios):
 
     variaveis = VARIAVEIS_POSSIVEIS
     qntd_variaveis = numero_variaveis(binarios)
-    simplificados_ao_maximo = calcula_crivo(binarios)
     expressao_simplificada = ""
 
     for num in simplificados_ao_maximo:

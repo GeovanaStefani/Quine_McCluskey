@@ -1,43 +1,79 @@
-# TESTE
-# site para verificar = https://atozmath.com/KMap.aspx?q=quine&q1=4%2C8%2C10%2C11%2C12%2C15%60%60a%2Cb%2Cc%2Cd%601&do=1#tblSolution
-# y = a'b'c' + ab'c + abc' + a'b'c + a'bc + ab'c'
-# Em binário = 000, 101, 110, 001, 011, 100
-# Em ordem = 000, 001, 011, 100, 101, 110
-# Decimal = 0, 1, 3, 4, 5, 6
-# indices separados = [['001', '100'], ['011', '101', '110']]
-
-#a'b'c + a'bc' + ab'c' + a'bc + abc' + abc
-#x'y'z + xy'z' + x'yz' + x'yz + xy'z + xyz
-#abcd + abcd' + abc'd'
-#a'b'c'd' + a'b'cd + a'bcd' + a'bc'd + abc'd'
-#0000, 0011, 0110, 0101, 1100
-#y = a'bc'd' + abc'd' + a'b'c'd + a'bc'd + a'bcd' + abcd'
-
 from Quine_McCluskey import *
 
-print("""
-Digite:
-    0 -> Para Calcular passando a Expressão com Variaveis
-    1 -> Para Calcular passando a Expressão com Binários
-    2 -> Para Calcular passando a Expressão com Minetermos(Decimais)
-""")
+def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
+    """
+    obseva a opcao que o usario vai mandar a expressao e faz as alteracoes com base em cada opcao:
+    0: transforma variaveis em binario
+    1: pega o input e coloca em uma lista
+    2: transforma de decimal para binario
 
-opcao = int(input())
-expressao_ou_binario_ou_decimais = input()
+    Args:
+        opcao ([Int]): opcao da expressao
+        expressao_ou_binario_ou_decimais ([str]): expressao que pode ser em variaveis, binarios ou minetermos
+
+    Returns:
+        binarios [List]: Lista de binarios
+    """
+    if opcao == 0:
+        binarios = transforma_em_binario(expressao_ou_binario_ou_decimais)
+    elif opcao == 1:
+        binarios = list(expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR))
+    elif opcao == 2:
+        binarios = []
+        decimais = list(map(int, expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR)))
+        
+        for d in decimais:
+            binarios.append(str(format(d, "b")))
+
+        binarios = completa_variaveis(binarios)
+
+    return binarios
+
+def imprime_opcoes():
+    """
+    Imprime as opções de entrada
+    """
+    print(("""{}
+    DIGITE:
+         ______________________________________________________________________
+        |                                                                      |
+        |   {}0 {}-> {}Para Calcular passando a Expressão com Variaveis              |
+        |   {}1 {}-> {}Para Calcular passando a Expressão com Binários               |
+        |   {}2 {}-> {}Para Calcular passando a Expressão com Minetermos(Decimais)   |
+        |______________________________________________________________________|
+    {}""").format(CYAN, YELLOW, RED, CYAN, YELLOW, RED, CYAN, YELLOW, RED, CYAN, RESET))
+
+def imprime_resultados(string_numeros_simplificados, string_crivo, simplificado_ao_maximo):
+    """
+    Imprime os resultados.
+    """
+    print("""
+    ______________________________________________
+
+        {}Numeros Simplificados: {}{}
+        {}Com o Mapa de Crivo: {}{}
+        {}Expressão Simplificada: {}{}
+    ______________________________________________{}
+    """.format(RED, YELLOW, string_numeros_simplificados, RED, YELLOW, string_crivo, RED, YELLOW, simplificado_ao_maximo, RESET))
+ 
+
+imprime_opcoes()
+
+opcao = int(input("{}       OPÇÃO: {}".format(GREEN, YELLOW)))
+expressao_ou_binario_ou_decimais = input("\n    {}INFORME A EXPRESSÃO: \n       {}Y = {}".format(CYAN, GREEN, YELLOW))
 
 binarios = verifica_opcao(opcao, expressao_ou_binario_ou_decimais)
-
 numeros_simplificados = compara_n_vezes(binarios)[1]
-print(numeros_simplificados)
-print("Numeros Simplificados: ", end = "")
+crivo = calcula_crivo(numeros_simplificados)
+simplificado_ao_maximo = transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios, crivo)
+
+string_numeros_simplificados = ""
+string_crivo = ""
+
 for num in numeros_simplificados:
-    print(num, end=" ")
-print()
+    string_numeros_simplificados += num + " "
 
-numeros_simplificados_crivo = calcula_crivo(binarios)
-print("CRIVO: ", end = "")
-for num in numeros_simplificados_crivo:
-    print(num, end=" ")
-print()
+for c in crivo:
+    string_crivo += c + " "
 
-print("Expressão Simplificada: {}".format(transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios)))
+imprime_resultados(string_numeros_simplificados, string_crivo, simplificado_ao_maximo)
