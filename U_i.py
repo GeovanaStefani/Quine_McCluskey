@@ -23,7 +23,7 @@ def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
         decimais = list(map(int, expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR)))
         
         for d in decimais:
-            binarios.append(str(format(d, "b")))
+            binarios.append(str(format(d, "b")))  
 
         binarios = completa_variaveis(binarios)
 
@@ -63,15 +63,17 @@ opcao = int(input("{}       OPÇÃO: {}".format(GREEN, YELLOW)))
 expressao_ou_binario_ou_decimais = input("\n    {}INFORME A EXPRESSÃO: \n       {}Y = {}".format(CYAN, GREEN, YELLOW))
 
 binarios = verifica_opcao(opcao, expressao_ou_binario_ou_decimais)
-numeros_simplificados = compara_n_vezes(binarios)[1]
-crivo = calcula_crivo(numeros_simplificados)
-simplificado_ao_maximo = transforma_em_variaveis(expressao_ou_binario_ou_decimais, binarios, crivo)
+qntd_variaveis = numero_variaveis(binarios)
+numeros_simplificados = compara_n_vezes(qntd_variaveis, binarios)[1]
+crivo = calcula_crivo(numeros_simplificados, qntd_variaveis)
+ordenados = ordena_simplificados(numeros_simplificados, crivo)
+simplificado_ao_maximo = transforma_em_variaveis(expressao_ou_binario_ou_decimais, qntd_variaveis, ordenados)
 
 string_numeros_simplificados = ""
 string_crivo = ""
 
 for num in numeros_simplificados:
-    string_numeros_simplificados += num + " "
+    string_numeros_simplificados += num + ESPACO
 
 for c in crivo:
     string_crivo += c + " "
