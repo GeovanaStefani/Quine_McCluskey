@@ -1,19 +1,5 @@
 from Constantes import *
 
-def lista_de_termos(expressao):
-    """ 
-    Transforma a expressao em uma lista de termos
-
-    Args:
-        expressao ([String]): Expressao com a soma de n termos, cada um contendo variáveis barradas (a'), ou não (a). 
-
-    Returns:
-        termos ([List]): Lista com todos os termos, sem o +.
-    """
-    termos = expressao.split(CARACTERE_SOMA)
-
-    return termos
-
 def transforma_em_binario(termos):
     """
     Transforma os termos, em binarios.
@@ -28,7 +14,6 @@ def transforma_em_binario(termos):
     Returns:
         binarios [List]: Lista de binarios
     """
-    #termos = lista_de_termos(expressao)
     binarios = []
 
     for termo in termos:
@@ -309,21 +294,20 @@ def todos_os_decimais_comparados(decimais_comparados):
 
 def crivo_generico(decimais_comparados, todos_decimais, decimais_depois_do_crivo):
     """
-    Ao calcular o Crivo, percebe-se duas situacoes:
-    - A primeira, eh que os valores que devem ir pra expressao sao aqueles que nao podem mais ser simplificados,
-    e seu numero nao eh utilizado mais de uma vez.
-    - Jah a segunda situacao, eh aquela em que depois de se ter os primeiros numeros, eh analisado quais ainda estao faltando entrar, mesmo que estejam repetidos, pegando sempre o primeiro.
-
-    O primeiro caso, identifiquei como 'C' remetendo ao contador, e o segundo com 'L', pois eh analisado se o elemento ja esta na lista.
+    Faz a primeira comparacao do crivo, analisando quais numeros que participaram da expressao final.
+    são eles, apenas os decimais que foram usados só uma vez.
+    Além disso, faz uma lista com elementos que precisaram ir para o segundo round do crivo, criando um dicionario de contribuicoes para ele
 
     Args:
         decimais_comparados ([Dict]): Chave: Termos; Valores: Lista com os decimais que precisaram ser comparados para chegar nele.
         todos os decimais [List]: Lista com todos esses decimais que foram usados na comparacao.
-        verificador ([String]): 'C' ou 'L', dependendo do caso
         decimais_depois_do_crivo ([List]): Os decimais que ainda restaram na comparacao depois do crivo.
 
     Returns:
-        [type]: [description]
+       simplificados [List]: Com os elementos que foram simplificados nessa rodada
+       decimais_depois_do_crivo [List]: Com os decimais que os numeros simplificados foram usados
+       dic_contribuicoes [Dict]: Dicionario, que tem como chave o termo e como o valor o tanto de contribuicoes que ele tem
+       precisa_ordenar [List]: Com os elementos que irão para a parte 2 do crivo
     """
     dic_contribuicoes = {}
     simplificados = []
@@ -353,19 +337,44 @@ def crivo_generico(decimais_comparados, todos_decimais, decimais_depois_do_crivo
             
     return simplificados, decimais_depois_do_crivo, dic_contribuicoes, precisa_ordenar
 
-def compara_termos_ordenados(decimais_comparados, ordenados, decimais_crivo, dic_contribuicoes):
-    for ordenado in ordenados:
+def compara_termos_ordenados(decimais_comparados, precisa_ordenar, decimais_crivo, dic_contribuicoes):
+    """
+    Depois que foi percorrido pela primeira vez o crivo, uma nova verificacao precisa ser feita.
+    Antes disso, é preciso pegar as contribuicoes dos elementos que serão analisados no round 2
+
+    Args:
+        decimais_comparados ([Dict]): Com os termos e uma lista com os decimais que foram comparados para chegar nele
+        precisa_ordenar ([List]): Com os elemetos que participaram do round 2
+        decimais_crivo ([List]): Com os decimai que já estão no cirvo
+        dic_contribuicoes ([Dict]): Dicionario com o termo e as contribuicoes dele
+
+    Returns:
+        dic_contribuicoes ([Dict]): Dicionario com o termo e as contribuicoes dele
+    """
+    for termo in precisa_ordenar:
         num_contribuicoes = 0
-        for decimal in decimais_comparados[ordenado]:
+        for decimal in decimais_comparados[termo]:
             if decimal not in decimais_crivo:
                 num_contribuicoes += 1
         
-        if ordenado not in dic_contribuicoes:
-                dic_contribuicoes[ordenado] = num_contribuicoes
+        if termo not in dic_contribuicoes:
+                dic_contribuicoes[termo] = num_contribuicoes
 
     return dic_contribuicoes
 
 def compara_ordenados(ordenados, decimais_comparados, decimais_crivo, simplificados):
+    """
+    Round 2 do crivo, analisando os termos que já estão ordenados
+
+    Args:
+        ordenados ([List]): Com os elementos que serão analisados
+        decimais_comparados ([Dict]): Dicionario que tem o termo como chave e como valor os decimais comparados que foram usados para chegar no termo
+        decimais_crivo ([List]): Decimais que já estão no crivo
+        simplificados ([List]): Com os termos que ja foram simplificados
+
+    Returns:
+        simplificados_2 [List]: Com os termos simplificados na segunda rodada
+    """
     simplificados_2 = []
     for ordenado in ordenados:
         for decimal in decimais_comparados[ordenado]:
@@ -396,6 +405,16 @@ def repete_crivo_nas_duas_opcoes(decimais_comparados, todos_decimais):
     return simplificados_1, simplificados_2
 
 def ordena_por_contribuicoes(dic_contribuicoes, precisa_ordenar):
+    """
+    Analisa o dicionario com as contribuicoes, e ordena de acordo com quem tem mais contribuicoes
+
+    Args:
+        dic_contribuicoes ([Dict]): Com os termos e a quantidade de contribuicoes
+        precisa_ordenar ([List]): Com os elementos que precisaram ser ordenados
+
+    Returns:
+        ordenados[List]: com os termos ordenados
+    """
     dic_repetidos = {}
     lista_contribuicoes = []
     lista_termos_correspondentes = []
@@ -437,22 +456,6 @@ def ordena_por_contribuicoes(dic_contribuicoes, precisa_ordenar):
 
     return ordenados
 
-def adiciona_na_lista_simplificados(simplificados, simplificado_x):
-    """
-    Existe varias simplificacoes, e os elementos de cada lista precisam ser adionados em uma inteira
-
-    Args:
-        simplificados ([List]): Lista com todos os termos simplificados
-        simplificado_x ([List]): Lista que vai ser adicionada dentro da que vai ter todos
-
-    Returns:
-        simplificados [List]: Com os novos termos adicionados.
-    """
-    for s in simplificado_x:
-        if s not in simplificados:
-            simplificados.append(s)
-
-    return simplificados
 
 def cria_dicionario_mais_simplificado(decimais_comparados, simplificados_2):
     """
@@ -492,12 +495,11 @@ def repete_processo_do_crivo(decimais_comparados, eh_primeira_vez, simplificados
 
     todos_decimais = todos_os_decimais_comparados(decimais_comparados)
     simplificados_1, simplificados_2 = repete_crivo_nas_duas_opcoes(decimais_comparados, todos_decimais)
-    #simplificados = adiciona_na_lista_simplificados(simplificados, simplificados_1)
 
     return simplificados_1, simplificados_2
 
 
-def calcula_crivo(decimais_comparados, qntd_variaveis):
+def calcula_crivo(decimais_comparados):
     """
     O crivo minimiza ainda mais a expressao.
     Para isso, pega-se todos os valores (em decimal) que foram comparados ate chegar naquele termo.
@@ -506,10 +508,9 @@ def calcula_crivo(decimais_comparados, qntd_variaveis):
 
     Args:
         decimais_comparados ([Dict]): Dicionario com decimais ja comparados.
-        qntd_variaveis ([Int]): Quantidade de variaveis
 
     Returns:
-        todos_os_simplificados [List]: Lista com os termos simplificados ao maximo
+        lista_final [List]: Lista com os termos simplificados ao maximo
     """
     lista_com_lista_dos_processos = []
     todos_os_simplificados= []
