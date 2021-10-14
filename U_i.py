@@ -15,19 +15,23 @@ def verifica_opcao(opcao, expressao_ou_binario_ou_decimais):
         binarios [List]: Lista de binarios
     """
     if opcao == 0:
-        binarios = transforma_em_binario(expressao_ou_binario_ou_decimais)
+        termos, eh_valida, mensagem = valida_expressao2(opcao, expressao_ou_binario_ou_decimais)
+        binarios = transforma_em_binario(termos)
     elif opcao == 1:
-        binarios = list(expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR))
+        binarios, eh_valida, mensagem = valida_expressao2(opcao, expressao_ou_binario_ou_decimais)
+        binarios = completa_variaveis(binarios)
+        if eh_valida:
+            eh_valida, mensagem = valida_expressao1(eh_valida, binarios)
     elif opcao == 2:
         binarios = []
-        decimais = list(map(int, expressao_ou_binario_ou_decimais.split(CARACTERE_SEPARAR)))
+        decimais, eh_valida, mensagem = valida_expressao2(opcao, expressao_ou_binario_ou_decimais)
         
         for d in decimais:
             binarios.append(str(format(d, "b")))  
 
         binarios = completa_variaveis(binarios)
 
-    return binarios
+    return binarios, eh_valida, mensagem
 
 def imprime_opcoes():
     """
@@ -66,10 +70,10 @@ def imprime_sem_simplificacoes():
 
 def informa_invalidade(informacao_invalida):
     print(""" {}
-                        ____________________________________
+                ___________________________________________________________
                                                     
-                            {}Informe uma {} válida{}  
-                        ____________________________________
+                {}{}{}  
+                __________________________________________________________
         """.format(RED, YELLOW, informacao_invalida, RED))
 
 def valida_sair(sair):
@@ -83,7 +87,7 @@ def valida_sair(sair):
 def valida_opcao(opcao):
     opcao = opcao.strip()
     while opcao != "0" and opcao != "1" and opcao != "2":
-        informa_invalidade("opção")
+        informa_invalidade("Informe uma opção válida")
         imprime_opcoes()
         opcao = input("{}       OPÇÃO: {}".format(GREEN, YELLOW))
         opcao = opcao.strip()
@@ -136,54 +140,67 @@ def formato_de_entrada_opcoes(opcao):
 
 def valida_expressao(opcao, expressao):
     while True:
-        expressao = expressao.strip()
-        try:
-            binarios = verifica_opcao(opcao, expressao)
-            break
-        except:
-            informa_invalidade("expressão")
+        binarios, eh_valida, mensagem = verifica_opcao(opcao, expressao)
+        if not eh_valida:
+            informa_invalidade(mensagem)
             expressao = input("{}       Y = {}".format(GREEN, YELLOW))
+        else:
+            break
 
     return binarios
 
 def valida_expressao2(opcao, expressao):
-    #1,2,3
-    while expressao != "":
-        lista_minitermos = []
-        expressao = expressao.strip()
-        expressao = expressao.strip(CARACTERE_SEPARAR)
-        ultimo_indice = len(expressao)-1
-        aux = ""
-        for num in expressao:
-            eh_caractere_de_separar = False
-    
-            try:
-                num = int(num)
-            except:
-                #if num == CARACTERE_SEPARAR or num == ESPACO:
+    lista_minitermos = []
+    expressao = expressao.strip()
+    expressao = expressao.strip(CARACTERE_SEPARAR)
+    ultimo_indice = len(expressao)-1
+    aux = ""
+    for i in range (len(expressao)):
+        eh_caractere_de_separar = False
+
+        try:
+            if opcao==1 or opcao == 2:
+                numero = int(expressao[i])
+            elif not(expressao[i] in VARIAVEIS_POSSIVEIS or expressao[i] == CARACTERE_BARRAMENTO):
                 eh_caractere_de_separar = True
 
-            eh_ultimo = False
+        except:
+            eh_caractere_de_separar = True
 
-            if not eh_caractere_de_separar:
-                aux += str(num)
-                indice = expressao.index(str(num))
-                if indice == ultimo_indice:
-                    eh_ultimo = True
+        eh_ultimo = False
 
-            if (eh_caractere_de_separar and aux!= "") or eh_ultimo:
-                lista_minitermos.append(int(aux))
-                aux = ""
+        if not eh_caractere_de_separar:
+            aux += expressao[i]
+            if i == ultimo_indice:
+                eh_ultimo = True
 
-        qntd_minitermos = len(lista_minitermos)
-        if qntd_minitermos == 0:
-            print("não dá")
-        elif  qntd_minitermos == 1:
-            print("Você precisa informar no mínimo dois minitermos para serem comparados")
-        print(lista_minitermos)
-        expressao = input()
+        if (eh_caractere_de_separar and aux!= "") or eh_ultimo:
+            if opcao == 2:
+                aux = int(aux)
+            lista_minitermos.append(aux)
+            aux = ""
+
+    eh_valida = True
+    mensagem = ""
+    qntd_minitermos = len(lista_minitermos)
+    if qntd_minitermos == 0:
+        mensagem = "Nenhum número informado, por favor, informe a expressao de acordo com o formato estabelecido"
+        eh_valida = False
+    elif  qntd_minitermos == 1:
+        mensagem = "Você precisa informar no mínimo dois minitermos para serem comparados!"
+        eh_valida = False
     
-    return expressao
+    return lista_minitermos, eh_valida, mensagem
+
+def valida_expressao1(eh_valida, binarios):
+    mensagem = ""
+    for termo in binarios:   
+        for t in termo:
+            if t!=BINARIO_0 and t!=BINARIO_1:
+                eh_valida = False
+                mensagem = "Essa opção, só aceita números em binário, 0 ou 1!"
+
+    return eh_valida, mensagem
 
 
 def valida_saida(simplificado_ao_maximo, string_numeros_simplificados, string_crivo):
@@ -192,17 +209,14 @@ def valida_saida(simplificado_ao_maximo, string_numeros_simplificados, string_cr
     else:
         imprime_resultados(string_numeros_simplificados, string_crivo, simplificado_ao_maximo)
 
-
-valida_expressao2(1, input())
-
-'''while True:
+while True:
     imprime_opcoes()
     opcao = input("{}       OPÇÃO: {}".format(GREEN, YELLOW))
     opcao = valida_opcao(opcao)
     formato_de_entrada_opcoes(opcao)
     expressao_ou_binario_ou_decimais = input("{}        Y = {}".format(GREEN, YELLOW))
-    binarios = valida_expressao(opcao, expressao_ou_binario_ou_decimais)
 
+    binarios = valida_expressao(opcao, expressao_ou_binario_ou_decimais)
     qntd_variaveis = numero_variaveis(binarios)
     numeros_simplificados = compara_n_vezes(qntd_variaveis, binarios)[1]
     crivo = calcula_crivo(numeros_simplificados, qntd_variaveis)
@@ -223,4 +237,4 @@ valida_expressao2(1, input())
     sair = valida_sair(sair)
 
     if sair == "S":
-        break'''
+        break

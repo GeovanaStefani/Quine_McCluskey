@@ -14,7 +14,7 @@ def lista_de_termos(expressao):
 
     return termos
 
-def transforma_em_binario(expressao):
+def transforma_em_binario(termos):
     """
     Transforma os termos, em binarios.
 
@@ -28,7 +28,7 @@ def transforma_em_binario(expressao):
     Returns:
         binarios [List]: Lista de binarios
     """
-    termos = lista_de_termos(expressao)
+    #termos = lista_de_termos(expressao)
     binarios = []
 
     for termo in termos:
