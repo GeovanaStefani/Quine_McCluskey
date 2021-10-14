@@ -307,7 +307,7 @@ def todos_os_decimais_comparados(decimais_comparados):
 
     return todos_decimais
 
-def crivo_generico(decimais_comparados, todos_decimais, verificador, decimais_depois_do_crivo):
+def crivo_generico(decimais_comparados, todos_decimais, decimais_depois_do_crivo):
     """
     Ao calcular o Crivo, percebe-se duas situacoes:
     - A primeira, eh que os valores que devem ir pra expressao sao aqueles que nao podem mais ser simplificados,
@@ -325,31 +325,56 @@ def crivo_generico(decimais_comparados, todos_decimais, verificador, decimais_de
     Returns:
         [type]: [description]
     """
-    simplificados_ao_maximo = []
-    decimais_depois_do_crivo2 = []
+    dic_contribuicoes = {}
+    simplificados = []
+    precisa_ordenar = []
 
     for elem in decimais_comparados:  #Percorre o dicionario
-        validador = True 
-        for decimal in decimais_comparados[elem]: #Percorre a Lista com os decimais que existe em cada valor das chaves
-            if verificador == "C":
-                contador = todos_decimais.count(decimal) #Primeiro caso, analisa se ha menos de dois elementos
-                if contador < COMPARACOES_POR_VEZ:   #vai percorrendo a lista e se o numero tiver sido colocado na lista mais de uma vez, é pq tem em outros termos tbm, logo se todos os elem forem usados, pode sair.
-                    validador = False
-            elif verificador == "L":   #Segundo caso
-                if decimal not in decimais_depois_do_crivo: #Se o elemento nao estiver na lista com todos os outros decimais, ele precisa ser incluido
-                    validador = False
-        
-        if not validador:
-            simplificados_ao_maximo.append(elem) #Lista so com as chaves do dicionario que foram simplificados ao maximo
-            for d_c in decimais_comparados[elem]:
-                if d_c not in decimais_depois_do_crivo: 
-                    decimais_depois_do_crivo.append(d_c) #Adicionando na lista os elementos que ainda nao estao
-                    decimais_depois_do_crivo2.append(d_c)
-    
-    if verificador == "L":
-        decimais_depois_do_crivo = decimais_depois_do_crivo2.copy()
+        num_contribuicoes = 0
+        validador = False
+        for decimal in decimais_comparados[elem]:
+            contador = todos_decimais.count(decimal) 
+            if contador < COMPARACOES_POR_VEZ:  
+                validador = True
 
-    return simplificados_ao_maximo, decimais_depois_do_crivo
+        if validador:
+            for decimal in decimais_comparados[elem]:
+                if decimal not in decimais_depois_do_crivo:
+                    num_contribuicoes += 1
+                    decimais_depois_do_crivo.append(decimal)
+
+            simplificados.append(elem) #Lista so com as chaves do dicionario que foram simplificados ao maximo
+
+            if elem not in dic_contribuicoes:
+                dic_contribuicoes[elem] = num_contribuicoes
+        else:
+            precisa_ordenar.append(elem)
+
+            
+    return simplificados, decimais_depois_do_crivo, dic_contribuicoes, precisa_ordenar
+
+def compara_termos_ordenados(decimais_comparados, ordenados, decimais_crivo, dic_contribuicoes):
+    for ordenado in ordenados:
+        num_contribuicoes = 0
+        for decimal in decimais_comparados[ordenado]:
+            if decimal not in decimais_crivo:
+                num_contribuicoes += 1
+        
+        if ordenado not in dic_contribuicoes:
+                dic_contribuicoes[ordenado] = num_contribuicoes
+
+    return dic_contribuicoes
+
+def compara_ordenados(ordenados, decimais_comparados, decimais_crivo, simplificados):
+    simplificados_2 = []
+    for ordenado in ordenados:
+        for decimal in decimais_comparados[ordenado]:
+            if decimal not in decimais_crivo:
+                decimais_crivo.append(decimal)
+                if ordenado not in simplificados:
+                    simplificados_2.append(ordenado)
+
+    return simplificados_2
 
 def repete_crivo_nas_duas_opcoes(decimais_comparados, todos_decimais):
     """
@@ -363,10 +388,54 @@ def repete_crivo_nas_duas_opcoes(decimais_comparados, todos_decimais):
         simplificados_1, simplificados_2 [List]: Com os termos simplificados em cada caso
     """
 
-    simplificados_1, decimais_crivo1 = crivo_generico(decimais_comparados, todos_decimais, "C", [])
-    simplificados_2 = crivo_generico(decimais_comparados, todos_decimais, "L", decimais_crivo1.copy())[0]
+    simplificados_1, decimais_depois_do_crivo, dic_contribuicoes, precisa_ordenar = crivo_generico(decimais_comparados, todos_decimais, [])
+    dic_contribuicoes = compara_termos_ordenados(decimais_comparados, precisa_ordenar, decimais_depois_do_crivo, dic_contribuicoes)
+    ordenados = ordena_por_contribuicoes(dic_contribuicoes, precisa_ordenar)
+    simplificados_2 = compara_ordenados(ordenados, decimais_comparados, decimais_depois_do_crivo, simplificados_1)
 
     return simplificados_1, simplificados_2
+
+def ordena_por_contribuicoes(dic_contribuicoes, precisa_ordenar):
+    dic_repetidos = {}
+    lista_contribuicoes = []
+    lista_termos_correspondentes = []
+
+    for elem in precisa_ordenar:
+        if dic_contribuicoes[elem] in lista_contribuicoes:
+            if dic_contribuicoes[elem] not in dic_repetidos:
+                dic_repetidos[dic_contribuicoes[elem]] = []
+
+            indice = lista_contribuicoes.index(dic_contribuicoes[elem])
+            if lista_termos_correspondentes[indice] not in dic_repetidos[dic_contribuicoes[elem]]:
+                dic_repetidos[dic_contribuicoes[elem]].append(lista_termos_correspondentes[indice])
+
+            dic_repetidos[dic_contribuicoes[elem]].append(elem)
+            
+        else:
+            lista_contribuicoes.append(dic_contribuicoes[elem])
+            lista_termos_correspondentes.append(elem)
+
+    for a in range(len(lista_contribuicoes)):
+        for b in range(a+1, len(lista_contribuicoes)):
+            if lista_contribuicoes[a] <= lista_contribuicoes[b]:
+                temp = lista_termos_correspondentes[a]
+                lista_termos_correspondentes[a] = lista_termos_correspondentes[b]
+                lista_termos_correspondentes[b] = temp
+
+                temp2 = lista_contribuicoes[a]
+                lista_contribuicoes[a] = lista_contribuicoes[b]
+                lista_contribuicoes[b] = temp2
+
+    ordenados = lista_termos_correspondentes.copy()
+    for num in dic_repetidos:
+        indice = lista_contribuicoes.index(num)
+        termo = lista_termos_correspondentes[indice]
+        indice_termo = ordenados.index(termo)
+        del ordenados[indice_termo]
+        for i in range(len(dic_repetidos[num])):
+            ordenados.insert(indice_termo+i, dic_repetidos[num][i])
+
+    return ordenados
 
 def adiciona_na_lista_simplificados(simplificados, simplificado_x):
     """
@@ -423,9 +492,9 @@ def repete_processo_do_crivo(decimais_comparados, eh_primeira_vez, simplificados
 
     todos_decimais = todos_os_decimais_comparados(decimais_comparados)
     simplificados_1, simplificados_2 = repete_crivo_nas_duas_opcoes(decimais_comparados, todos_decimais)
-    simplificados = adiciona_na_lista_simplificados(simplificados, simplificados_1)
+    #simplificados = adiciona_na_lista_simplificados(simplificados, simplificados_1)
 
-    return simplificados, simplificados_2
+    return simplificados_1, simplificados_2
 
 
 def calcula_crivo(decimais_comparados, qntd_variaveis):
@@ -442,16 +511,32 @@ def calcula_crivo(decimais_comparados, qntd_variaveis):
     Returns:
         todos_os_simplificados [List]: Lista com os termos simplificados ao maximo
     """
-
-    todos_os_simplificados = []
-    simplificados_x = []
+    lista_com_lista_dos_processos = []
+    todos_os_simplificados= []
+    simplificados_x= []
     eh_primeira_vez = True
-    for i in range(qntd_variaveis//COMPARACOES_POR_VEZ):
-        if i > 0:
-            eh_primeira_vez = False
-        todos_os_simplificados, simplificados_x = repete_processo_do_crivo(decimais_comparados, eh_primeira_vez, todos_os_simplificados, simplificados_x)
+    lista_final = []
 
-    return todos_os_simplificados
+    cont = 0
+    while True:
+        todos_os_simplificados, simplificados_x = repete_processo_do_crivo(decimais_comparados, eh_primeira_vez, todos_os_simplificados, simplificados_x)
+        
+        if cont > 0:
+            eh_primeira_vez = False
+        
+        simplificados_aux = todos_os_simplificados.copy()
+        
+        lista_com_lista_dos_processos.append(simplificados_aux)
+        cont += 1
+
+        if len(simplificados_x) == 0:
+            break
+
+    for lista in lista_com_lista_dos_processos:
+        for num in lista:
+            lista_final.append(num)
+
+    return lista_final
 
 def ordena_simplificados(numeros_simplificados, crivo):
     """
@@ -497,7 +582,7 @@ def completa_variaveis(binarios):
 
     return binarios
             
-def transforma_em_variaveis(expressao_ou_binario_ou_decimais, qntd_variaveis, simplificados_ao_maximo):
+def transforma_em_variaveis(qntd_variaveis, simplificados_ao_maximo):
     """
     Transforma os elementos que nao sairam da lista de comparacao em variaveis e, consequentemente, termos da expressao.
     Bem parecida com a funcao que transforma em binarios, sendo que ao contrario.
@@ -523,8 +608,5 @@ def transforma_em_variaveis(expressao_ou_binario_ou_decimais, qntd_variaveis, si
                 aux += variaveis[i]
         
         expressao_simplificada += aux+CARACTERE_SOMA
-
-    if len(expressao_simplificada) == 0: #se nao pode ser simplificada, recebe a propria expresao
-        expressao_simplificada = expressao_ou_binario_ou_decimais
 
     return expressao_simplificada.rstrip(CARACTERE_SOMA)
